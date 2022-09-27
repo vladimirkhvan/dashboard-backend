@@ -116,13 +116,19 @@ export const blockUsers = (req, res) => {
         }
 
         db.query(q, [...req.body.ids], (err, data) => {
-            if (err) {
-                return res.json(err);
-            }
-            if (req.body.ids.includes(req.userId)) {
+            try {
+                if (err) {
+                    return res.json(err);
+                }
+                if (req.body.ids.includes(req.userId)) {
+                    return res.json({ success: true, isAuthorized: false });
+                } else {
+                    return res.json({ success: true, isAuthorized: true });
+                }
+            } catch (error) {
+                console.log(error);
                 return res.json({ success: true, isAuthorized: false });
             }
-            return res.json({ success: true, isAuthorized: true });
         });
     } catch (error) {
         return res.json({ success: false, isAuthorized: false });
@@ -142,8 +148,9 @@ export const unblockUsers = (req, res) => {
         db.query(q, [...req.body.ids], (err, data) => {
             if (err) {
                 return res.json(err);
+            } else {
+                return res.json({ success: true, isAuthorized: true });
             }
-            return res.json({ success: true, isAuthorized: true });
         });
     } catch (error) {
         return res.json(err);

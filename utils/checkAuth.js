@@ -5,8 +5,6 @@ import { jwt_key } from '../assets/jwt_key.js';
 import { db } from '../database/db.js';
 
 export default (req, res, next) => {
-    console.log('hi');
-    console.log(req.headers.authorization);
 
     const token = (req.headers.authorization || '').replace(/Bearer\s?/, '');
 
