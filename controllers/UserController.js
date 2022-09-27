@@ -47,7 +47,7 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     try {
-        const q = 'SELECT id, username, password, status FROM test.users WHERE email=?';
+        const q = 'SELECT id, username, password, status FROM heroku_bc558aeaefc8cb6.users WHERE email=?';
         const email = req.body.email;
         const password = req.body.password;
 
@@ -63,7 +63,7 @@ export const loginUser = async (req, res) => {
             const username = data[0].username;
 
             if (isValid) {
-                let q = 'UPDATE test.users SET lastVisit=? WHERE id = ?';
+                let q = 'UPDATE heroku_bc558aeaefc8cb6.users SET lastVisit=? WHERE id = ?';
 
                 db.query(q, [getFullDate(), id], (err, data) => {
                     if (err) {
@@ -90,7 +90,7 @@ export const loginUser = async (req, res) => {
 };
 
 export const blockUsers = (req, res) => {
-    let q = 'UPDATE test.users SET status="blocked" WHERE id = ?';
+    let q = 'UPDATE heroku_bc558aeaefc8cb6.users SET status="blocked" WHERE id = ?';
 
     if (req.body.ids.length > 1) {
         for (let i = 0; i < req.body.ids.length - 1; i++) {
@@ -110,7 +110,7 @@ export const blockUsers = (req, res) => {
 };
 
 export const unblockUsers = (req, res) => {
-    let q = 'UPDATE test.users SET status="active" WHERE id = ?';
+    let q = 'UPDATE heroku_bc558aeaefc8cb6.users SET status="active" WHERE id = ?';
 
     if (req.body.ids.length > 1) {
         for (let i = 0; i < req.body.ids.length - 1; i++) {
