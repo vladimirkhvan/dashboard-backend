@@ -20,11 +20,11 @@ export default (req, res, next) => {
                 } else {
                     next();
                 }
-            } catch (error) {
-                return res.json({ message: 'access denied', isAuthorized: false, error });
+            } catch (err) {
+                return res.json({ message: 'access denied', isAuthorized: false, err });
             }
         });
-    } catch (error) {
-        return res.json({ message: 'access denied', isAuthorized: false, error });
+    } catch (err) {
+        return res.json({ message: 'access denied', isAuthorized: false, err });
     }
 };

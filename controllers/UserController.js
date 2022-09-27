@@ -16,13 +16,13 @@ export const getUsers = (req, res) => {
                     return res.json(err);
                 }
                 return res.json({ users: data, isAuthorized: true });
-            } catch (error) {
+            } catch (err) {
                 return res.json(err);
             }
         });
-    } catch (error) {
-        console.log(error);
-        return res.json({ users: [], isAuthorized: false, error });
+    } catch (err) {
+        console.log(err);
+        return res.json({ users: [], isAuthorized: false, err });
     }
 };
 
@@ -49,7 +49,7 @@ export const registerUser = async (req, res) => {
                 }
 
                 return res.json({ message: 'User was added successfully' });
-            } catch (error) {
+            } catch (err) {
                 return res.status(409).json(err);
             }
         });
@@ -98,7 +98,7 @@ export const loginUser = async (req, res) => {
                 } else {
                     return res.json({ success: false, err });
                 }
-            } catch (error) {}
+            } catch (err) {}
         });
     } catch (err) {
         return res.json({ success: false, err });
@@ -115,12 +115,18 @@ export const blockUsers = (req, res) => {
         }
 
         db.query(findObjectives, [...req.body.ids.length], (err, data) => {
+
+            console.log(data.length, req.body.ids.length);
+
             try {
+                if (err) {
+                    return res.json({ message: 'access denied', isAuthorized: false, err });
+                }
                 if (data.length !== req.body.ids.length) {
                     return res.json({ message: 'access denied', isAuthorized: false });
                 }
-            } catch (error) {
-                return res.json({ message: 'access denied', isAuthorized: false, error });
+            } catch (err) {
+                return res.json({ message: 'access denied', isAuthorized: false, err });
             }
         });
 
@@ -142,12 +148,12 @@ export const blockUsers = (req, res) => {
                 } else {
                     return res.json({ success: true, isAuthorized: true });
                 }
-            } catch (error) {
-                console.log(error);
+            } catch (err) {
+                console.log(err);
                 return res.json({ success: true, isAuthorized: false });
             }
         });
-    } catch (error) {
+    } catch (err) {
         return res.json({ success: false, isAuthorized: false });
     }
 };
@@ -166,8 +172,8 @@ export const unblockUsers = (req, res) => {
                 if (data.length !== req.body.ids.length) {
                     return res.json({ message: 'access denied', isAuthorized: false });
                 }
-            } catch (error) {
-                return res.json({ message: 'access denied', isAuthorized: false, error });
+            } catch (err) {
+                return res.json({ message: 'access denied', isAuthorized: false, err });
             }
         });
 
@@ -182,12 +188,12 @@ export const unblockUsers = (req, res) => {
         db.query(q, [...req.body.ids], (err, data) => {
             try {
                 return res.json({ success: true, isAuthorized: true });
-            } catch (error) {
-                return res.json(error);
+            } catch (err) {
+                return res.json(err);
             }
         });
-    } catch (error) {
-        return res.json(error);
+    } catch (err) {
+        return res.json(err);
     }
 };
 
@@ -205,8 +211,8 @@ export const deleteUsers = (req, res) => {
                 if (data.length !== req.body.ids.length) {
                     return res.json({ message: 'access denied', isAuthorized: false });
                 }
-            } catch (error) {
-                return res.json({ message: 'access denied', isAuthorized: false, error });
+            } catch (err) {
+                return res.json({ message: 'access denied', isAuthorized: false, err });
             }
         });
         let q = 'DELETE FROM users WHERE id = ?';
@@ -226,7 +232,7 @@ export const deleteUsers = (req, res) => {
             }
             return res.json({ success: true, isAuthorized: true });
         });
-    } catch (error) {
-        return res.json(error);
+    } catch (err) {
+        return res.json(err);
     }
 };

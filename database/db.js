@@ -11,6 +11,6 @@ const db_config = {
 
 try {
     db = mysql.createConnection(db_config);
-} catch (error) {
+} catch (err) {
     console.log('cannot connect db');
 }
