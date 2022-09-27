@@ -1,6 +1,8 @@
 import { db } from '../database/db.js';
 
 export default (req, res, next) => {
+    console.log(req);
+
     try {
         const findObjectives = 'SELECT id FROM users WHERE id = ?';
         if (req.body.ids.length > 1) {
