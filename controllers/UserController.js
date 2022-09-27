@@ -107,6 +107,7 @@ export const loginUser = async (req, res) => {
 
 export const blockUsers = (req, res) => {
     try {
+
         let q = 'UPDATE users SET status="blocked" WHERE id = ?';
 
         if (req.body.ids.length > 1) {
@@ -117,6 +118,9 @@ export const blockUsers = (req, res) => {
 
         db.query(q, [...req.body.ids], (err, data) => {
             try {
+                if (err) {
+                    return res.json(err);
+                }
                 if (req.body.ids.includes(req.userId)) {
                     return res.json({ success: true, isAuthorized: false });
                 } else {
@@ -124,7 +128,7 @@ export const blockUsers = (req, res) => {
                 }
             } catch (error) {
                 console.log(error);
-                return res.json({ success: false, isAuthorized: false });
+                return res.json({ success: true, isAuthorized: false });
             }
         });
     } catch (error) {
@@ -165,16 +169,12 @@ export const deleteUsers = (req, res) => {
         }
 
         db.query(q, [...req.body.ids], (err, data) => {
-            try {
-                if (err) {
-                }
-                if (req.body.ids.includes(req.userId)) {
-                    return res.json({ success: true, isAuthorized: false });
-                }
-            } catch (error) {
+            if (err) {
                 return res.json(err);
             }
-
+            if (req.body.ids.includes(req.userId)) {
+                return res.json({ success: true, isAuthorized: false });
+            }
             return res.json({ success: true, isAuthorized: true });
         });
     } catch (error) {
