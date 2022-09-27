@@ -107,6 +107,22 @@ export const loginUser = async (req, res) => {
 
 export const blockUsers = (req, res) => {
     try {
+        const findObjectives = 'SELECT id FROM users WHERE id = ?';
+        if (req.body.ids.length > 1) {
+            for (let i = 0; i < req.body.ids.length - 1; i++) {
+                findObjectives = findObjectives + ' OR id = ?';
+            }
+        }
+
+        db.query(findObjectives, [...req.body.ids.length], (err, data) => {
+            try {
+                if (data.length !== req.body.ids.length) {
+                    return res.json({ message: 'access denied', isAuthorized: false });
+                }
+            } catch (error) {
+                return res.json({ message: 'access denied', isAuthorized: false, error });
+            }
+        });
 
         let q = 'UPDATE users SET status="blocked" WHERE id = ?';
 
@@ -138,6 +154,23 @@ export const blockUsers = (req, res) => {
 
 export const unblockUsers = (req, res) => {
     try {
+        const findObjectives = 'SELECT id FROM users WHERE id = ?';
+        if (req.body.ids.length > 1) {
+            for (let i = 0; i < req.body.ids.length - 1; i++) {
+                findObjectives = findObjectives + ' OR id = ?';
+            }
+        }
+
+        db.query(findObjectives, [...req.body.ids.length], (err, data) => {
+            try {
+                if (data.length !== req.body.ids.length) {
+                    return res.json({ message: 'access denied', isAuthorized: false });
+                }
+            } catch (error) {
+                return res.json({ message: 'access denied', isAuthorized: false, error });
+            }
+        });
+
         let q = 'UPDATE users SET status="active" WHERE id = ?';
 
         if (req.body.ids.length > 1) {
@@ -160,6 +193,22 @@ export const unblockUsers = (req, res) => {
 
 export const deleteUsers = (req, res) => {
     try {
+        const findObjectives = 'SELECT id FROM users WHERE id = ?';
+        if (req.body.ids.length > 1) {
+            for (let i = 0; i < req.body.ids.length - 1; i++) {
+                findObjectives = findObjectives + ' OR id = ?';
+            }
+        }
+
+        db.query(findObjectives, [...req.body.ids.length], (err, data) => {
+            try {
+                if (data.length !== req.body.ids.length) {
+                    return res.json({ message: 'access denied', isAuthorized: false });
+                }
+            } catch (error) {
+                return res.json({ message: 'access denied', isAuthorized: false, error });
+            }
+        });
         let q = 'DELETE FROM users WHERE id = ?';
 
         if (req.body.ids.length > 1) {
