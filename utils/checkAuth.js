@@ -17,8 +17,12 @@ export default (req, res, next) => {
         const q = 'SELECT id FROM  users WHERE id = ? AND status = "active"';
 
         db.query(q, [decodedInfo.id], (err, data) => {
-            if (data.length < 1 || err) {
-                return res.json({ message: 'access denied', isAuthorized: false });
+            try {
+                if (data.length < 1 || err) {
+                    return res.json({ message: 'access denied', isAuthorized: false });
+                }
+            } catch (error) {
+                return res.json({ message: 'access denied', isAuthorized: false, error });
             }
         });
         next();
