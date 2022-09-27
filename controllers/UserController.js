@@ -116,7 +116,7 @@ export const blockUsers = (req, res) => {
 
         db.query(findObjectives, [...req.body.ids.length], (err, data) => {
 
-            console.log(data.length, req.body.ids.length);
+            console.log(data, req.body.ids.length);
 
             try {
                 if (err) {
