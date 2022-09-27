@@ -12,6 +12,9 @@ export const getUsers = (req, res) => {
     try {
         db.query(q, (err, data) => {
             try {
+                if (err) {
+                    return res.json(err);
+                }
                 return res.json({ users: data, isAuthorized: true });
             } catch (error) {
                 return res.json(err);
@@ -41,6 +44,10 @@ export const registerUser = async (req, res) => {
 
         db.query(q, [values], (err, data) => {
             try {
+                if (err) {
+                    return res.status(409).json(err);
+                }
+
                 return res.json({ message: 'User was added successfully' });
             } catch (error) {
                 return res.status(409).json(err);
@@ -159,11 +166,14 @@ export const deleteUsers = (req, res) => {
 
         db.query(q, [...req.body.ids], (err, data) => {
             try {
+                if (err) {
+                }
                 if (req.body.ids.includes(req.userId)) {
                     return res.json({ success: true, isAuthorized: false });
                 }
             } catch (error) {
-                return res.json(err);}
+                return res.json(err);
+            }
 
             return res.json({ success: true, isAuthorized: true });
         });
