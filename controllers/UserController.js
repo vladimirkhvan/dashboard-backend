@@ -56,8 +56,10 @@ export const loginUser = async (req, res) => {
                 return res.json({ success: false, err });
             }
 
+            let isValid;
+
             try {
-                const isValid =
+                isValid =
                     (await bcrypt.compare(password, data[0].password)) &&
                     data[0].status === 'active';
             } catch (error) {
