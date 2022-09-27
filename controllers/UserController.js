@@ -183,7 +183,7 @@ export const unblockUsers = (req, res) => {
             try {
                 return res.json({ success: true, isAuthorized: true });
             } catch (error) {
-                return res.json(err);
+                return res.json(error);
             }
         });
     } catch (error) {
