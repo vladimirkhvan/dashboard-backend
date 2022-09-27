@@ -9,21 +9,12 @@ import { db } from '../database/db.js';
 
 export const getUsers = (req, res) => {
     const q = 'SELECT * FROM users';
-    try {
-        db.query(q, (err, data) => {
-            try {
-                if (err) {
-                    return res.json(err);
-                }
-                return res.json({ users: data, isAuthorized: true });
-            } catch (err) {
-                return res.json(err);
-            }
-        });
-    } catch (err) {
-        console.log(err);
-        return res.json({ users: [], isAuthorized: false, err });
-    }
+    db.query(q, (err, data) => {
+        if (err) {
+            return res.json(err);
+        }
+        return res.json({ users: data, isAuthorized: true });
+    });
 };
 
 export const registerUser = async (req, res) => {
@@ -43,15 +34,11 @@ export const registerUser = async (req, res) => {
         ];
 
         db.query(q, [values], (err, data) => {
-            try {
-                if (err) {
-                    return res.status(409).json(err);
-                }
-
-                return res.json({ message: 'User was added successfully' });
-            } catch (err) {
+            if (err) {
                 return res.status(409).json(err);
             }
+
+            return res.json({ message: 'User was added successfully' });
         });
     } catch (err) {
         return res.status(500).json({ message: 'Server is unable to proceed data' });
@@ -65,40 +52,42 @@ export const loginUser = async (req, res) => {
         const password = req.body.password;
 
         db.query(q, [email], async (err, data) => {
-            try {
-                if (err || data.length < 1) {
-                    return res.json({ success: false, err });
-                }
+            if (err || data.length < 1) {
+                return res.json({ success: false, err });
+            }
 
+            try {
                 const isValid =
                     (await bcrypt.compare(password, data[0].password)) &&
                     data[0].status === 'active';
+            } catch (error) {
+                return res.json({ success: false, err });
+            }
 
-                const id = data[0].id;
-                const username = data[0].username;
+            const id = data[0].id;
+            const username = data[0].username;
 
-                if (isValid) {
-                    let q = 'UPDATE users SET lastVisit=? WHERE id = ?';
+            if (isValid) {
+                let q = 'UPDATE users SET lastVisit=? WHERE id = ?';
 
-                    db.query(q, [getFullDate(), id], (err, data) => {
-                        if (err) {
-                            return res.json({ success: false, err });
-                        }
-                    });
+                db.query(q, [getFullDate(), id], (err, data) => {
+                    if (err) {
+                        return res.json({ success: false, err });
+                    }
+                });
 
-                    const token = jwt.sign(
-                        {
-                            id: id,
-                        },
-                        jwt_key,
-                        { expiresIn: '30d' },
-                    );
+                const token = jwt.sign(
+                    {
+                        id: id,
+                    },
+                    jwt_key,
+                    { expiresIn: '30d' },
+                );
 
-                    return res.json({ success: true, token, id, username });
-                } else {
-                    return res.json({ success: false, err });
-                }
-            } catch (err) {}
+                return res.json({ success: true, token, id, username });
+            } else {
+                return res.json({ success: false, err });
+            }
         });
     } catch (err) {
         return res.json({ success: false, err });
@@ -106,133 +95,57 @@ export const loginUser = async (req, res) => {
 };
 
 export const blockUsers = (req, res) => {
-    try {
-        const findObjectives = 'SELECT id FROM users WHERE id = ?';
-        if (req.body.ids.length > 1) {
-            for (let i = 0; i < req.body.ids.length - 1; i++) {
-                findObjectives = findObjectives + ' OR id = ?';
-            }
+    const q = 'UPDATE users SET status="blocked" WHERE id = ?';
+    if (req.body.ids.length > 1) {
+        for (let i = 0; i < req.body.ids.length - 1; i++) {
+            q = q + ' OR id = ?';
         }
-
-        db.query(findObjectives, [...req.body.ids.length], (err, data) => {
-
-            console.log(data, req.body.ids.length);
-
-            try {
-                if (err) {
-                    return res.json({ message: 'access denied', isAuthorized: false, err });
-                }
-                if (data.length !== req.body.ids.length) {
-                    return res.json({ message: 'access denied', isAuthorized: false });
-                }
-            } catch (err) {
-                return res.json({ message: 'access denied', isAuthorized: false, err });
-            }
-        });
-
-        let q = 'UPDATE users SET status="blocked" WHERE id = ?';
-
-        if (req.body.ids.length > 1) {
-            for (let i = 0; i < req.body.ids.length - 1; i++) {
-                q = q + ' OR id = ?';
-            }
-        }
-
-        db.query(q, [...req.body.ids], (err, data) => {
-            try {
-                if (err) {
-                    return res.json(err);
-                }
-                if (req.body.ids.includes(req.userId)) {
-                    return res.json({ success: true, isAuthorized: false });
-                } else {
-                    return res.json({ success: true, isAuthorized: true });
-                }
-            } catch (err) {
-                console.log(err);
-                return res.json({ success: true, isAuthorized: false });
-            }
-        });
-    } catch (err) {
-        return res.json({ success: false, isAuthorized: false });
     }
+
+    db.query(q, [...req.body.ids], (err, data) => {
+        if (err) {
+            return res.json({ success: true, isAuthorized: false });
+        }
+        if (req.body.ids.includes(req.userId)) {
+            return res.json({ success: true, isAuthorized: false });
+        }
+        return res.json({ success: true, isAuthorized: true });
+    });
 };
 
 export const unblockUsers = (req, res) => {
-    try {
-        const findObjectives = 'SELECT id FROM users WHERE id = ?';
-        if (req.body.ids.length > 1) {
-            for (let i = 0; i < req.body.ids.length - 1; i++) {
-                findObjectives = findObjectives + ' OR id = ?';
-            }
+    let q = 'UPDATE users SET status="active" WHERE id = ?';
+
+    if (req.body.ids.length > 1) {
+        for (let i = 0; i < req.body.ids.length - 1; i++) {
+            q = q + ' OR id = ?';
         }
-
-        db.query(findObjectives, [...req.body.ids.length], (err, data) => {
-            try {
-                if (data.length !== req.body.ids.length) {
-                    return res.json({ message: 'access denied', isAuthorized: false });
-                }
-            } catch (err) {
-                return res.json({ message: 'access denied', isAuthorized: false, err });
-            }
-        });
-
-        let q = 'UPDATE users SET status="active" WHERE id = ?';
-
-        if (req.body.ids.length > 1) {
-            for (let i = 0; i < req.body.ids.length - 1; i++) {
-                q = q + ' OR id = ?';
-            }
-        }
-
-        db.query(q, [...req.body.ids], (err, data) => {
-            try {
-                return res.json({ success: true, isAuthorized: true });
-            } catch (err) {
-                return res.json(err);
-            }
-        });
-    } catch (err) {
-        return res.json(err);
     }
+
+    db.query(q, [...req.body.ids], (err, data) => {
+        if (err) {
+            return res.json({ success: false, isAuthorized: false });
+        }
+        return res.json({ success: true, isAuthorized: true });
+    });
 };
 
 export const deleteUsers = (req, res) => {
-    try {
-        const findObjectives = 'SELECT id FROM users WHERE id = ?';
-        if (req.body.ids.length > 1) {
-            for (let i = 0; i < req.body.ids.length - 1; i++) {
-                findObjectives = findObjectives + ' OR id = ?';
-            }
+    let q = 'DELETE FROM users WHERE id = ?';
+
+    if (req.body.ids.length > 1) {
+        for (let i = 0; i < req.body.ids.length - 1; i++) {
+            q = q + ' OR id = ?';
         }
-
-        db.query(findObjectives, [...req.body.ids.length], (err, data) => {
-            try {
-                if (data.length !== req.body.ids.length) {
-                    return res.json({ message: 'access denied', isAuthorized: false });
-                }
-            } catch (err) {
-                return res.json({ message: 'access denied', isAuthorized: false, err });
-            }
-        });
-        let q = 'DELETE FROM users WHERE id = ?';
-
-        if (req.body.ids.length > 1) {
-            for (let i = 0; i < req.body.ids.length - 1; i++) {
-                q = q + ' OR id = ?';
-            }
-        }
-
-        db.query(q, [...req.body.ids], (err, data) => {
-            if (err) {
-                return res.json(err);
-            }
-            if (req.body.ids.includes(req.userId)) {
-                return res.json({ success: true, isAuthorized: false });
-            }
-            return res.json({ success: true, isAuthorized: true });
-        });
-    } catch (err) {
-        return res.json(err);
     }
+
+    db.query(q, [...req.body.ids], (err, data) => {
+        if (err) {
+            return res.json(err);
+        }
+        if (req.body.ids.includes(req.userId)) {
+            return res.json({ success: true, isAuthorized: false });
+        }
+        return res.json({ success: true, isAuthorized: true });
+    });
 };
