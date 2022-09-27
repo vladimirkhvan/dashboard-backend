@@ -14,7 +14,7 @@ export default (req, res, next) => {
         const decodedInfo = jwt.decode(token, jwt_key);
         req.userId = decodedInfo.id;
 
-        const q = 'SELECT id FROM heroku_bc558aeaefc8cb6.users WHERE id = ? AND status = "active"';
+        const q = 'SELECT id FROM  users WHERE id = ? AND status = "active"';
 
         db.query(q, [decodedInfo.id], (err, data) => {
             if (data.length < 1 || err) {
