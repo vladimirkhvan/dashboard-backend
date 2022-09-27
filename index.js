@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import checkAuth from './utils/checkAuth.js';
+import checkValidObjectvies from './utils/checkValidObjectvies.js';
 
 import {
     loginUser,
@@ -22,11 +23,11 @@ app.post('/users', registerUser);
 
 app.post('/users/login', loginUser);
 
-app.put('/users/block', checkAuth, blockUsers);
+app.put('/users/block', [checkAuth, checkValidObjectvies], blockUsers);
 
-app.put('/users/unblock', checkAuth, unblockUsers);
+app.put('/users/unblock', [checkAuth, checkValidObjectvies], unblockUsers);
 
-app.delete('/users', checkAuth, deleteUsers);
+app.delete('/users', [checkAuth, checkValidObjectvies], deleteUsers);
 
 app.listen(process.env.PORT || 8800, () => {
     console.log('server is working properly');
