@@ -187,7 +187,7 @@ export const unblockUsers = (req, res) => {
             }
         });
     } catch (error) {
-        return res.json(err);
+        return res.json(error);
     }
 };
 
