@@ -97,7 +97,7 @@ export const loginUser = async (req, res) => {
 };
 
 export const blockUsers = (req, res) => {
-    const q = 'UPDATE users SET status="blocked" WHERE id = ?';
+    let q = 'UPDATE users SET status="blocked" WHERE id = ?';
     if (req.body.ids.length > 1) {
         for (let i = 0; i < req.body.ids.length - 1; i++) {
             q = q + ' OR id = ?';
